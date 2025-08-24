@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { LoginComponent } from "./components/login/login.component";
-import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { TaskCardComponent } from "./components/task-card/task-card.component";
+import { MatDialogModule } from '@angular/material/dialog';
+
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LoginComponent, TaskCardComponent],
+  imports: [RouterOutlet, MatDialogModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
