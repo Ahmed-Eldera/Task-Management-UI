@@ -35,22 +35,25 @@ export class DashboardComponent {
       this.userService.editTask(result).subscribe({
   next: (savedTask) => {
     console.log('Task saved successfully:', savedTask);
+        this.userService.getUserData().subscribe((tasks: Task[]) => {
+      this.tasks = tasks;
+    })
   },
   error: (err) => {
     console.error('Error saving task:', err);
   }
 });
 
-      // ✅ Simple check: values are not empty
+      //  Simple check: values are not empty
       if (result.name && result.status && result.description) {
-        console.log('All fields saved correctly ✅');
+        console.log('All fields saved correctly ');
         // Here is where you’d call your service in the future:
         // this.taskService.createTask(result);
       } else {
-        console.warn('Some fields are empty ❌', result);
+        console.warn('Some fields are empty ', result);
       }
     } else {
-      console.log('Dialog was closed without saving ❌');
+      console.log('Dialog was closed without saving ');
     }
   });
   }
@@ -68,6 +71,9 @@ createTask(): void {
       this.userService.createTask(result).subscribe({
   next: (savedTask) => {
     console.log('Task saved successfully:', savedTask);
+    this.userService.getUserData().subscribe((tasks: Task[]) => {
+      this.tasks = tasks;
+    });
   },
   error: (err) => {
     console.error('Error saving task:', err);
