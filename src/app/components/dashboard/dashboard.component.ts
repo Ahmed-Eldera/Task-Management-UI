@@ -14,8 +14,9 @@ import { MyFormDialogComponent } from '../my-form-dialog/my-form-dialog.componen
   standalone: true,
 })
 export class DashboardComponent {
-  private userService = inject(userService);
-  private dialog = inject(MatDialog);
+  constructor(private userService: userService, private dialog: MatDialog) {
+
+  }
   tasks: Task[] = [];
     ngOnInit() {
     this.userService.getUserData().subscribe((tasks: Task[]) => {
