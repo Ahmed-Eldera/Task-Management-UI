@@ -51,6 +51,7 @@ export class userService implements IuserService {
   }
 
   getUserData(): Observable<Task[]> {
+    console.log(this.user);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!user.name || !user.password) {
       this.user.name = 'guest';
