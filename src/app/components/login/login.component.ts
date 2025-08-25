@@ -3,7 +3,7 @@ import {    FormGroup,
     FormControl,
     Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/userService.service';
+import { userService } from '../../services/userService.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 })
 @Injectable({providedIn: 'root'})
 export class LoginComponent {
-  private userService = inject(AuthService);
+  private userService = inject(userService);
   private router = inject(Router);
 
 

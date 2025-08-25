@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>Create / Edit Task</h2>
+<mat-dialog-content>
+  <p>Fill in the task details</p>
+
+  <!-- Name -->
+  <mat-form-field appearance="fill">
+    <mat-label>Task Name</mat-label>
+    <input matInput [(ngModel)]="name" />
+  </mat-form-field>
+
+  <!-- Status -->
+  <mat-form-field appearance="fill">
+    <mat-label>Status</mat-label>
+    <mat-select [(ngModel)]="status">
+      <mat-option value="ToDo">To Do</mat-option>
+      <mat-option value="InProgress">In Progress</mat-option>
+      <mat-option value="Completed">Completed</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Description -->
+  <mat-form-field appearance="fill">
+    <mat-label>Description</mat-label>
+    <textarea matInput [(ngModel)]="description"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button 
+    mat-button 
+    [mat-dialog-close]="{ name: name(), status: status(), description: description() }" 
+    >
+    Save
+  </button>
+</mat-dialog-actions>

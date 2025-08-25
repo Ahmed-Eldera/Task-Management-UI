@@ -1,73 +1,105 @@
-
-import {  inject, Injectable } from '@angular/core';
-import {    FormGroup} from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { inject, Injectable } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+
 import { Task } from '../models/task.model';
 import { User } from '../models/User.model';
-import { CookieService } from 'ngx-cookie-service';
+import { IuserService } from '../services/userService.interface';
 
-import { map } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class userService implements IuserService {
   private http = inject(HttpClient);
-  private user:User ={id:0,name:'',password:''};
-  private cookieService = inject(CookieService);
+  private user: User = { id: 0, name: '', password: '' };
 
-   tasks:Task[]=[];
+  tasks: Task[] = [];
 
-  set userName(name:string){
+  set userName(name: string) {
     this.user.name = name;
   }
-  set userId(id:number){
+  get userName(): string {
+    return this.user.name;
+  }
+
+  set userId(id: number) {
     this.user.id = id;
   }
-  set userPassword(password:string){
+  get userId(): number {
+    return this.user.id;
+  }
+
+  set userPassword(password: string) {
     this.user.password = password;
-  } 
-  saveCredentials(user:FormGroup){
-    this.user.name =user.value.name;
-    this.user.password = user.value.password
-  
-  
-    this.cookieService.set('user', JSON.stringify(this.user));
   }
-  loadCredentials(){
-    const user = JSON.parse(this.cookieService.get('user') || '{}');
-    this.user.name = user.name;
-    this.user.password = user.password;
+  get userPassword(): string {
+    return this.user.password;
   }
-  getUserData() {
-    const user = JSON.parse(this.cookieService.get('user') || '{}');
-    if(!user.name || !user.password){
+
+  saveCredentials(user: FormGroup): void {
+    this.user.name = user.value.name;
+    this.user.password = user.value.password;
+
+    // Save in localStorage instead of cookies
+    localStorage.setItem('user', JSON.stringify(this.user));
+  }
+
+  loadCredentials(): void {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.user.name = user.name || '';
+    this.user.password = user.password || '';
+  }
+
+  getUserData(): Observable<Task[]> {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.name || !user.password) {
       this.user.name = 'guest';
       this.user.password = 'guest';
-    }else{
+    } else {
       this.user.name = user.name;
       this.user.password = user.password;
     }
-    const credentials = `${this.user.name}:${ this.user.password}`;
+
+    const credentials = `${this.user.name}:${this.user.password}`;
     const encodedCredentials = btoa(credentials);
 
-return this.http.get<Task[]>('http://localhost:8080/tasks', {
-  headers: { 'Authorization': `Basic ${encodedCredentials}` }
-                  }).pipe(
-                    map(response => response.map(item => ({
-                      id: item.id,
-                      name: item.name,
-                      description: item.description,
-                      user_id: item.user_id,
-                      status: item.status
-                    })))
-                  );
-            
-          }
-          deleteTask(taskId: number) {
-            const credentials = `${this.user.name}:${this.user.password}`;
-            console.log(credentials);
-            const encodedCredentials = btoa(credentials);
-            return this.http.delete(`http://localhost:8080/tasks/${taskId}`, {
-              headers: { 'Authorization': `Basic ${encodedCredentials}` }
-            });
-          }
+    return this.http.get<Task[]>('http://localhost:8080/tasks', {
+      headers: { Authorization: `Basic ${encodedCredentials}` }
+    }).pipe(
+      map(response =>
+        response.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          user_id: item.user_id,
+          status: item.status
+        }))
+      )
+    );
+  }
+
+  deleteTask(taskId: number): Observable<any> {
+    const credentials = `${this.user.name}:${this.user.password}`;
+    const encodedCredentials = btoa(credentials);
+    return this.http.delete(`http://localhost:8080/tasks/${taskId}`, {
+      headers: { Authorization: `Basic ${encodedCredentials}` }
+    });
+  }
+
+  createTask(task: Task): Observable<Task> {
+    task.user_id = this.user.id;
+    const credentials = `${this.user.name}:${this.user.password}`;
+    const encodedCredentials = btoa(credentials);
+    return this.http.post<Task>('http://localhost:8080/tasks', task, {
+      headers: { Authorization: `Basic ${encodedCredentials}` }
+    });
+  }
+
+  editTask(task: Task): Observable<Task> {
+    const credentials = `${this.user.name}:${this.user.password}`;
+    const encodedCredentials = btoa(credentials);
+    return this.http.put<Task>(`http://localhost:8080/tasks/${task.id}`, task, {
+      headers: { Authorization: `Basic ${encodedCredentials}` }
+    });
+  }
 }
