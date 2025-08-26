@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { Task } from '../../models/task.model';
@@ -6,26 +6,55 @@ import { userService } from '../../services/userService.service';
 import { switchMap } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MyFormDialogComponent } from '../my-form-dialog/my-form-dialog.component';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
   standalone: true,
 })
-export class DashboardComponent {
-  constructor(private userService: userService, private dialog: MatDialog) {
+export class DashboardComponent implements OnInit{
+  constructor(
+    private userService: userService,
+    private dialog: MatDialog,
+    private injector: Injector
+  ) { }
 
-  }
   tasks: Task[] = [];
     ngOnInit() {
     this.userService.getUserData().subscribe((tasks: Task[]) => {
       this.tasks = tasks;
     });
   }
+
+
+  filter= new FormGroup({
+  selectedStatus: new FormControl('')
+  });
+
+
+
+
+  filterTasks(){
+    const status = this.filter.get('selectedStatus')?.value;
+    console.log('Filtering tasks with status:', status);
+    if(status){
+      this.userService.filterTasksByStatus(status).subscribe((tasks: Task[]) => {
+      this.tasks = tasks;
+    });
+    } else {
+      this.userService.getUserData().subscribe((tasks: Task[]) => {
+      this.tasks = tasks;
+    });
+    }
+
+  }
   editTask(task: Task): void { 
     const dialogRef = this.dialog.open(MyFormDialogComponent, {
-    data: { name: task.name, status: task.status, description: task.description } // initial values (can be empty or an existing task)
+    data: { name: task.name, status: task.status, description: task.description , dueDate: task.dueDate} // initial values (can be empty or an existing task)
   });
 
   dialogRef.afterClosed().subscribe(result => {
@@ -59,8 +88,10 @@ export class DashboardComponent {
   });
   }
 createTask(): void {
+  
   const dialogRef = this.dialog.open(MyFormDialogComponent, {
-    data: { name: '', status: '', description: '' } // initial values (can be empty or an existing task)
+    data: { name: '', status: '', description: '', dueDate: null } ,
+    injector: this.injector // initial values (can be empty or an existing task)
   });
 
   dialogRef.afterClosed().subscribe(result => {

@@ -73,7 +73,8 @@ export class userService implements IuserService {
           name: item.name,
           description: item.description,
           user_id: item.user_id,
-          status: item.status
+          status: item.status,
+          dueDate: new Date(item.dueDate) // Convert to Date object
         }))
       )
     );
@@ -86,7 +87,13 @@ export class userService implements IuserService {
       headers: { Authorization: `Basic ${encodedCredentials}` }
     });
   }
-
+  filterTasksByStatus(status: string): Observable<Task[]> {
+    const credentials = `${this.user.name}:${this.user.password}`;
+    const encodedCredentials = btoa(credentials);
+    return this.http.get<Task[]>(`http://localhost:8080/tasks/${status}`, {
+      headers: { Authorization: `Basic ${encodedCredentials}` }
+    });
+  }
   createTask(task: Task): Observable<Task> {
     task.user_id = this.user.id;
     const credentials = `${this.user.name}:${this.user.password}`;

@@ -12,6 +12,8 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatNativeDateModule} from '@angular/material/core';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 
@@ -19,6 +21,7 @@ export interface DialogData {
   name: string;
   status: string;
   description: string;
+  dueDate: Date;
 }
 
 
@@ -37,7 +40,9 @@ export interface DialogData {
     MatDialogActions,
     MatDialogClose,
     MatSelectModule,
-    MatOptionModule
+    MatOptionModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
 })
 export class MyFormDialogComponent {
@@ -48,6 +53,7 @@ export class MyFormDialogComponent {
   name = model(this.data?.name ?? '');
   status = model(this.data?.status ?? '');
   description = model(this.data?.description ?? '');
+  dueDate = model<Date | null>(this.data?.dueDate ?? null);
 
   onNoClick(): void {
     this.dialogRef.close();
